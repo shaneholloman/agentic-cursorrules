@@ -20,7 +20,7 @@ When working with AI assistance across different parts of a codebase:
 ## Installation
 
 1. Clone the repository:```bash
-git clone https://github.com/yourusername/agentic-cursorrules.git
+git clone https://github.com/yourusername/agentic-cursorrules.git .agentic-cursorrules
 cd agentic-cursorrules
 ```
 
