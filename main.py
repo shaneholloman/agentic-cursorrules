@@ -12,35 +12,27 @@ class ProjectTreeGenerator:
         """
         self.project_root = project_root
         
-        # Initialize gitignore matcher - look for gitignore in parent directory
-        gitignore_path = project_root.parent / '.gitignore'
+        # Load config from YAML
+        config_path = project_root / 'agentic-cursorrules' / 'config.yaml'
+        with open(config_path, 'r') as f:
+            config = yaml.safe_load(f)
+            
+        # Set file extensions from config
+        self.INCLUDE_EXTENSIONS: Set[str] = set(config.get('include_extensions', []))
+        self.IMPORTANT_DIRS = set(config.get('important_dirs', []))
+        self.EXCLUDE_DIRS = set(config.get('exclude_dirs', []))
+        
+        # Initialize gitignore matcher
+        gitignore_path = project_root / '.gitignore'
         if gitignore_path.exists():
             self.matches = parse_gitignore(gitignore_path)
         else:
-            # Create temporary gitignore file with defaults in the parent directory
-            temp_gitignore = project_root.parent / '.temp_gitignore'
+            # Create temporary gitignore with exclude_dirs from config
+            temp_gitignore = project_root / '.temp_gitignore'
             with open(temp_gitignore, 'w') as f:
-                f.write("""# Dependencies
-node_modules/
-venv/
-env/
-__pycache__/
-
-# Builds
-dist/
-build/""")
+                f.write('\n'.join(f'{dir}/' for dir in self.EXCLUDE_DIRS))
             self.matches = parse_gitignore(temp_gitignore)
-            temp_gitignore.unlink()  # Clean up temporary file
-        
-        # Keep INCLUDE_EXTENSIONS for explicit file type filtering
-        self.INCLUDE_EXTENSIONS: Set[str] = {
-            '.py', '.rb', '.php', '.js', '.ts',
-            '.c', '.cpp', '.h', '.hpp', '.rs', '.go',
-            '.java', '.kt', '.scala',
-            '.cs', '.fs', '.vb',
-            '.html', '.css', '.jsx', '.tsx',
-            '.swift', '.r', '.jl'
-        }
+            temp_gitignore.unlink()
 
     def generate_tree(self, directory: Path, file_types: List[str] = None, max_depth: int = 3) -> List[str]:
         """Generates a visual tree representation of the directory structure."""
@@ -52,18 +44,26 @@ build/""")
 
             items = sorted(list(dir_path.iterdir()), key=lambda x: (not x.is_file(), x.name))
             for i, item in enumerate(items):
-                # Use gitignore rules instead of hardcoded exclusions
-                if self.matches(str(item)):
+                # Skip if in exclude_dirs or matches gitignore
+                if item.name in self.EXCLUDE_DIRS or self.matches(str(item)):
                     continue
 
                 is_last = i == len(items) - 1
                 display_path = item.name
 
                 if item.is_dir():
-                    tree_lines.append(f"{prefix}{'└── ' if is_last else '├── '}{display_path}/")
-                    _generate_tree(item, prefix + ('    ' if is_last else '│   '), depth + 1)
-                elif item.is_file() and (file_types is None or any(item.name.endswith(ext) for ext in file_types)):
-                    tree_lines.append(f"{prefix}{'└── ' if is_last else '├── '}{display_path}")
+                    # Always include important directories
+                    if item.name in self.IMPORTANT_DIRS:
+                        tree_lines.append(f"{prefix}{'└── ' if is_last else '├── '}{display_path}/")
+                        _generate_tree(item, prefix + ('    ' if is_last else '│   '), depth + 1)
+                    else:
+                        tree_lines.append(f"{prefix}{'└── ' if is_last else '├── '}{display_path}/")
+                        _generate_tree(item, prefix + ('    ' if is_last else '│   '), depth + 1)
+                elif item.is_file():
+                    # Use configured extensions if no specific file_types provided
+                    extensions_to_check = file_types if file_types else self.INCLUDE_EXTENSIONS
+                    if any(item.name.endswith(ext) for ext in extensions_to_check):
+                        tree_lines.append(f"{prefix}{'└── ' if is_last else '├── '}{display_path}")
 
         _generate_tree(directory)
         return tree_lines
@@ -151,6 +151,7 @@ if __name__ == "__main__":
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
             focus_dirs = config.get('tree_focus', [])
+            include_extensions = config.get('include_extensions', [])
         
         # Generate tree for each focus directory
         found_dirs = generator.find_focus_dirs(project_root, focus_dirs)
@@ -158,7 +159,7 @@ if __name__ == "__main__":
         for focus_dir in found_dirs:
             print(f"\nTree for {focus_dir.name}:")
             print("=" * (len(focus_dir.name) + 9))
-            tree_content = generator.generate_tree(focus_dir, ['.py', '.ts', '.tsx'])
+            tree_content = generator.generate_tree(focus_dir, include_extensions)
             print('\n'.join(tree_content))
             
             # Save tree files in .agentic-cursorrules directory

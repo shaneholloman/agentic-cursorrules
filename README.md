@@ -1,4 +1,4 @@
-# Agentic cursorrules
+# Agentic Cursor Rules
 
 A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
@@ -197,7 +197,8 @@ Contributions are welcome, particularly in these areas:
 
 ## Technical Overview
 
-Agentic cursorrules: A practical implementation for managing multi-agent development through strict file-tree partitioning and access control.
+```yaml
+Agentic Cursor Rules: A practical implementation for managing multi-agent development through strict file-tree partitioning and access control.
 
 Technical Overview:
 - Generates domain-specific agent rulesets from base cursor rules
