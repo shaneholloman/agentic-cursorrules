@@ -69,7 +69,7 @@ If there's already a `.cursorrules` file available in the root folder, it will b
    - Reference the appropriate markdown file for the domain you're working in
    - Use `@domain_name.md` to provide context to the AI
    - Keep the AI focused on files within the specified domain
-   - 
+
 ### Best Practices
 - Empirically tested to work well with up to 4 concurrent agents
 - Consider system resources when running multiple instances
