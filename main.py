@@ -94,51 +94,30 @@ build/""")
 def generate_agent_files(focus_dirs: List[str], agentic_dir: Path):
     """
     Generates agent-specific markdown files for each focus directory.
-    
-    Args:
-        focus_dirs: List of directory names to focus on
-        agentic_dir: Path to the .agentic-cursorrules directory
     """
-    # Get the parent (root) directory
     root_dir = agentic_dir.parent
-    
-    # Create default .cursorrules content if file doesn't exist
-    default_rules = """You are an intelligent programmer assistant. Please help analyze and improve code in this directory.
-
-Key instructions:
-1. Focus on code quality and best practices
-2. Suggest improvements while maintaining existing functionality
-3. Consider performance, security, and maintainability
-4. Provide clear explanations for suggested changes"""
-
-    base_rules = default_rules
-    
-    # Try to read existing .cursorrules if available
     root_rules = root_dir / '.cursorrules'
     
-    if root_rules.exists():
-        with open(root_rules, 'r', encoding='utf-8') as f:
-            base_rules = f.read()
-
-    # Track created files to avoid duplicates
+    if not root_rules.exists():
+        print("\nWarning: No .cursorrules file found!")
+        print("Recommendation: Create a .cursorrules file in your project root with custom instructions.")
+        print("For now, only project structure will be included in the agent files.\n")
+    
     created_files = set()
 
-    # Create agent files for each focus directory
     for dir_name in focus_dirs:
-        # Skip if we've already created this file
         if dir_name in created_files:
             continue
             
-        # Read the corresponding tree file from .agentic-cursorrules
         tree_file = agentic_dir / f'tree_{dir_name}.txt'
         tree_content = ""
         if tree_file.exists():
             with open(tree_file, 'r', encoding='utf-8') as f:
                 tree_content = f.read()
         
-        agent_content = f"{base_rules}\n\nYou are an agent that will focus on the current files only:\n\n{tree_content}"
+        # Only include the tree content
+        agent_content = f"Project structure for {dir_name}:\n\n{tree_content}"
         
-        # Create the agent file only in root directory
         output_path = root_dir / f'agent_{dir_name}.md'
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(agent_content)

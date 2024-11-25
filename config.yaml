@@ -2,5 +2,7 @@ project_title: "cursorrules-agentic"
 
 tree_focus:
   - "src"
-  - "backend"
   - "frontend"
+  - "docs"
+  # - "tests"
+  # etc...
