@@ -282,10 +282,3 @@ yarn-error.log*
 next-env.d.ts
 
 # own scripts
-get_files.py
-.archive
-.cursorrules
-FE.txt
-BE.txt
-ALL.txt.replit
-.replit.nix
