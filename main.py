@@ -12,13 +12,13 @@ class ProjectTreeGenerator:
         """
         self.project_root = project_root
         
-        # Initialize gitignore matcher
-        gitignore_path = project_root / '.gitignore'
+        # Initialize gitignore matcher - look for gitignore in parent directory
+        gitignore_path = project_root.parent / '.gitignore'
         if gitignore_path.exists():
             self.matches = parse_gitignore(gitignore_path)
         else:
-            # Create temporary gitignore file with defaults
-            temp_gitignore = project_root / '.temp_gitignore'
+            # Create temporary gitignore file with defaults in the parent directory
+            temp_gitignore = project_root.parent / '.temp_gitignore'
             with open(temp_gitignore, 'w') as f:
                 f.write("""# Dependencies
 node_modules/
@@ -91,43 +91,85 @@ build/""")
                             found_dirs.append(subitem)
         return found_dirs
 
-def generate_agent_files(focus_dirs: List[str]):
+def generate_agent_files(focus_dirs: List[str], agentic_dir: Path):
     """
     Generates agent-specific markdown files for each focus directory.
     
     Args:
-        focus_dirs: List of focus directory names from config
+        focus_dirs: List of directory names to focus on
+        agentic_dir: Path to the .agentic-cursorrules directory
     """
-    # Read the base cursor rules
-    try:
-        with open('.cursorrules', 'r', encoding='utf-8') as f:
+    # Get the parent (root) directory
+    root_dir = agentic_dir.parent
+    
+    # Create default .cursorrules content if file doesn't exist
+    default_rules = """You are an intelligent programmer assistant. Please help analyze and improve code in this directory.
+
+Key instructions:
+1. Focus on code quality and best practices
+2. Suggest improvements while maintaining existing functionality
+3. Consider performance, security, and maintainability
+4. Provide clear explanations for suggested changes"""
+
+    base_rules = default_rules
+    
+    # Try to read existing .cursorrules if available
+    root_rules = root_dir / '.cursorrules'
+    
+    if root_rules.exists():
+        with open(root_rules, 'r', encoding='utf-8') as f:
             base_rules = f.read()
-    except FileNotFoundError:
-        print("Warning: .cursorrules not found")
-        base_rules = ""
+
+    # Track created files to avoid duplicates
+    created_files = set()
 
     # Create agent files for each focus directory
     for dir_name in focus_dirs:
-        agent_content = f"{base_rules}\n\nYou are an agent that will focus on the current files only:\n"
+        # Skip if we've already created this file
+        if dir_name in created_files:
+            continue
+            
+        # Read the corresponding tree file from .agentic-cursorrules
+        tree_file = agentic_dir / f'tree_{dir_name}.txt'
+        tree_content = ""
+        if tree_file.exists():
+            with open(tree_file, 'r', encoding='utf-8') as f:
+                tree_content = f.read()
         
-        # Create the agent file
-        output_path = f"agent_{dir_name}.md"
+        agent_content = f"{base_rules}\n\nYou are an agent that will focus on the current files only:\n\n{tree_content}"
+        
+        # Create the agent file only in root directory
+        output_path = root_dir / f'agent_{dir_name}.md'
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(agent_content)
         print(f"Created {output_path}")
+        
+        created_files.add(dir_name)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--recurring', action='store_true', help='Run the script every minute')
     args = parser.parse_args()
     
+    # Get the .agentic-cursorrules directory path
+    agentic_dir = Path(__file__).parent
+    
+    # Create default config.yaml in the .agentic-cursorrules directory
+    config_path = agentic_dir / 'config.yaml'
+    if not config_path.exists():
+        default_config = {
+            'tree_focus': ['backend', 'frontend']
+        }
+        with open(config_path, 'w') as f:
+            yaml.dump(default_config, f)
+    
     while True:
-        # Change from script location to current working directory
-        project_root = Path.cwd()
+        # Use parent directory of .agentic-cursorrules as the project root
+        project_root = agentic_dir.parent
         generator = ProjectTreeGenerator(project_root)
         
-        # Load focus directories from YAML config
-        with open('config.yaml', 'r') as f:
+        # Load focus directories from YAML config in .agentic-cursorrules directory
+        with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
             focus_dirs = config.get('tree_focus', [])
         
@@ -140,14 +182,14 @@ if __name__ == "__main__":
             tree_content = generator.generate_tree(focus_dir, ['.py', '.ts', '.tsx'])
             print('\n'.join(tree_content))
             
-            # Save to separate files
-            with open(f'tree_{focus_dir.name}.txt', 'w', encoding='utf-8') as f:
+            # Save tree files in .agentic-cursorrules directory
+            with open(agentic_dir / f'tree_{focus_dir.name}.txt', 'w', encoding='utf-8') as f:
                 f.write('\n'.join(tree_content))
         
-        # Generate agent files
-        generate_agent_files([d.name for d in found_dirs])
+        # Generate agent files in .agentic-cursorrules directory
+        generate_agent_files([d.name for d in found_dirs], agentic_dir)
 
         if not args.recurring:
             break
             
-        time.sleep(60)  # Wait for 1 minute before next run
+        time.sleep(60)

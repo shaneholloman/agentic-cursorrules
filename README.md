@@ -1,6 +1,6 @@
 # Agentic Cursor Rules
 
-A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning.
+A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
 ## Core Concept
 
@@ -41,22 +41,16 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Set up your `.cursorrules` file (inspired by [cursor-boost](https://github.com/grp06/cursor-boost)):
+4. Set up your `.cursorrules` file ()):
 ```bash
-# Clone cursor-boost into your repository
-git clone https://github.com/grp06/cursor-boost.git
-
 # Copy the example rules file
 cp .cursorrules.example .cursorrules
 
 # Edit the file with your specific rules, using cursor-boost as reference
 nano .cursorrules  # or use your preferred editor
-
-# Optional: Remove cursor-boost if you don't need it anymore
-rm -rf cursor-boost
 ```
-
-Note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator.
+Important note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator.
+If there's already a `.cursorrules` file available in the root folder, it will be used instead of the current directory files.
 
 ## Setting Up Multiple Agents
 
