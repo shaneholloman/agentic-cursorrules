@@ -91,6 +91,11 @@ tree_focus:
 python main.py
 ```
 
+If you want to run it every minute, use `--recurring` flag:
+```bash
+python main.py --recurring
+```
+
 3. Use the generated agent files in your prompts:
 ```
 agentic-cursorrules_agent_src.md  # Frontend-focused agent

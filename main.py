@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import List, Set
 import yaml
 from gitignore_parser import parse_gitignore
+import time
+import argparse
 
 class ProjectTreeGenerator:
     def __init__(self, project_root: Path):
@@ -115,29 +117,37 @@ def generate_agent_files(focus_dirs: List[str]):
         print(f"Created {output_path}")
 
 if __name__ == "__main__":
-    import yaml
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--recurring', action='store_true', help='Run the script every minute')
+    args = parser.parse_args()
     
-    # Change from script location to current working directory
-    project_root = Path.cwd()
-    generator = ProjectTreeGenerator(project_root)
-    
-    # Load focus directories from YAML config
-    with open('config.yaml', 'r') as f:
-        config = yaml.safe_load(f)
-        focus_dirs = config.get('tree_focus', [])
-    
-    # Generate tree for each focus directory
-    found_dirs = generator.find_focus_dirs(project_root, focus_dirs)
-    
-    for focus_dir in found_dirs:
-        print(f"\nTree for {focus_dir.name}:")
-        print("=" * (len(focus_dir.name) + 9))
-        tree_content = generator.generate_tree(focus_dir, ['.py', '.ts', '.tsx'])
-        print('\n'.join(tree_content))
+    while True:
+        # Change from script location to current working directory
+        project_root = Path.cwd()
+        generator = ProjectTreeGenerator(project_root)
         
-        # Save to separate files
-        with open(f'tree_{focus_dir.name}.txt', 'w', encoding='utf-8') as f:
-            f.write('\n'.join(tree_content))
-    
-    # Generate agent files
-    generate_agent_files([d.name for d in found_dirs])
+        # Load focus directories from YAML config
+        with open('config.yaml', 'r') as f:
+            config = yaml.safe_load(f)
+            focus_dirs = config.get('tree_focus', [])
+        
+        # Generate tree for each focus directory
+        found_dirs = generator.find_focus_dirs(project_root, focus_dirs)
+        
+        for focus_dir in found_dirs:
+            print(f"\nTree for {focus_dir.name}:")
+            print("=" * (len(focus_dir.name) + 9))
+            tree_content = generator.generate_tree(focus_dir, ['.py', '.ts', '.tsx'])
+            print('\n'.join(tree_content))
+            
+            # Save to separate files
+            with open(f'tree_{focus_dir.name}.txt', 'w', encoding='utf-8') as f:
+                f.write('\n'.join(tree_content))
+        
+        # Generate agent files
+        generate_agent_files([d.name for d in found_dirs])
+
+        if not args.recurring:
+            break
+            
+        time.sleep(60)  # Wait for 1 minute before next run
