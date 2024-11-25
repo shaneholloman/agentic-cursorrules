@@ -1,26 +1,25 @@
-# agentic-cursorrules
+# Agentic Cursor Rules
 
 A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
 ## Core Concept
 
-This tool addresses a critical challenge in multi-agent development: preventing merge conflicts and maintaining codebase coherence when multiple AI agents work simultaneously. It does this by:
+This tool addresses a critical challenge in AI-assisted development: preventing merge conflicts and maintaining codebase coherence when using AI assistance across different parts of your codebase. It does this by:
 
 1. Partitioning the codebase into logical domains (e.g., frontend, API, database)
-2. Generating agent-specific rulesets with explicit file-tree boundaries
-3. Enforcing strict access controls through clear prompting
+2. Generating domain-specific markdown files with explicit file-tree boundaries
+3. Providing clear context and access rules for AI assistants through these markdown files
 
 ## Why This Matters
 
-When working with multiple AI agents on a single codebase:
-- Agents can inadvertently modify the same files
+When working with AI assistance across different parts of a codebase:
+- AI responses might modify files outside their intended domain
 - Changes in one area can cascade into unintended modifications elsewhere
-- Maintaining context becomes increasingly difficult as the codebase grows
+- Maintaining proper context becomes increasingly difficult as the codebase grows
 
 ## Installation
 
-1. Clone the repository:
-```bash
+1. Clone the repository:```bash
 git clone https://github.com/yourusername/agentic-cursorrules.git
 cd agentic-cursorrules
 ```
@@ -52,11 +51,11 @@ nano .cursorrules  # or use your preferred editor
 Important note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator.
 If there's already a `.cursorrules` file available in the root folder, it will be used instead of the current directory files.
 
-## Setting Up Multiple Agents
+## Using Domain-Specific Markdown Files
 
 ### Setup Requirements
-- Cursor version 0.43 or higher
-- Sufficient system resources for multiple instances
+- A project with distinct architectural boundaries
+- Clear domain separation (e.g., frontend/backend/database)
 
 ### Creating Multiple Agent Windows
 1. Use `CMD/CTRL + Shift + P` to open the command palette
@@ -64,6 +63,13 @@ If there's already a `.cursorrules` file available in the root folder, it will b
 3. Repeat this process for each desired agent window
 4. Arrange the windows according to your preferred layout
 
+### Using the Generated Markdown Files
+1. Generate domain-specific markdown files using the tool
+2. When working with an AI assistant:
+   - Reference the appropriate markdown file for the domain you're working in
+   - Use `@domain_name.md` to provide context to the AI
+   - Keep the AI focused on files within the specified domain
+   - 
 ### Best Practices
 - Empirically tested to work well with up to 4 concurrent agents
 - Consider system resources when running multiple instances
@@ -103,6 +109,37 @@ agentic-cursorrules_agent_db.md   # Database-focused agent
    - Use `@agentic-cursorrules_agent_db.md` in the database agent window
 
 This @ reference system ensures each agent stays within its designated boundaries, preventing conflicting file edits across domains!
+
+- Use one markdown file per domain
+- Reference the appropriate markdown file when switching domains
+- Keep domain boundaries clear and well-defined
+
+## Default Configuration
+
+The tool comes with sensible defaults for web development projects, tailor it as you like:
+
+```yaml
+# Important directories that should always be included
+important_dirs:
+  - components
+  - pages
+  - app
+  # ... and more common directories
+
+# Directories that should always be excluded
+exclude_dirs:
+  - node_modules
+  - dist
+  - build
+  # ... and more build/dependency directories
+
+# File extensions to include
+include_extensions:
+  - .py
+  - .ts
+  - .tsx
+  # ... and a lot more file types
+```
 
 ## How It Works
 
@@ -160,8 +197,7 @@ Contributions are welcome, particularly in these areas:
 
 ## Technical Overview
 
-```yaml
-Agentic Cursor Rules: A practical implementation for managing multi-agent development through strict file-tree partitioning and access control.
+Agentic cursorrules: A practical implementation for managing multi-agent development through strict file-tree partitioning and access control.
 
 Technical Overview:
 - Generates domain-specific agent rulesets from base cursor rules
