@@ -13,7 +13,7 @@ class ProjectTreeGenerator:
         self.project_root = project_root
         
         # Load config from YAML
-        config_path = project_root / 'agentic-cursorrules' / 'config.yaml'
+        config_path = project_root / '.agentic-cursorrules' / 'config.yaml'
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
             
