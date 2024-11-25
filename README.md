@@ -2,6 +2,8 @@
 
 A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
+![Uploading image.png…]()
+
 ## Core Concept
 
 This tool addresses a critical challenge in AI-assisted development: preventing merge conflicts and maintaining codebase coherence when using AI assistance across different parts of your codebase. It does this by:
