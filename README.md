@@ -41,14 +41,22 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-4. Set up your `.cursorrules` file:
+4. Set up your `.cursorrules` file (inspired by [cursor-boost](https://github.com/grp06/cursor-boost)):
 ```bash
-# Copy the example file
+# Clone cursor-boost into your repository
+git clone https://github.com/grp06/cursor-boost.git
+
+# Copy the example rules file
 cp .cursorrules.example .cursorrules
 
-# Edit the file with your specific rules
+# Edit the file with your specific rules, using cursor-boost as reference
 nano .cursorrules  # or use your preferred editor
+
+# Optional: Remove cursor-boost if you don't need it anymore
+rm -rf cursor-boost
 ```
+
+Note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator.
 
 ## Setting Up Multiple Agents
 
