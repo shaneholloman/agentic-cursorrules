@@ -44,11 +44,9 @@ pip install -r requirements.txt
 
 4. Set up your `.cursorrules` file ()):
 ```bash
-# Copy the example rules file
-cp .cursorrules.example .cursorrules
+# Add your favorite .cursorrules file
+cp .cursorrules .cursorrules.example
 
-# Edit the file with your specific rules, using cursor-boost as reference
-nano .cursorrules  # or use your preferred editor
 ```
 Important note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator.
 If there's already a `.cursorrules` file available in the root folder, it will be used instead of the current directory files.
