@@ -2,7 +2,7 @@
 
 A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
-![image](https://github.com/user-attachments/assets/4937c3da-fbd6-49b3-9c22-86ae02dabec7)
+<img src="https://github.com/user-attachments/assets/4937c3da-fbd6-49b3-9c22-86ae02dabec7" width="60%">
 
 ## Core Concept
 
