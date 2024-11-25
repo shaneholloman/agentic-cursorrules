@@ -41,6 +41,15 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+4. Set up your `.cursorrules` file:
+```bash
+# Copy the example file
+cp .cursorrules.example .cursorrules
+
+# Edit the file with your specific rules
+nano .cursorrules  # or use your preferred editor
+```
+
 ## Setting Up Multiple Agents
 
 ### Setup Requirements
