@@ -34,17 +34,17 @@ Important note: The `.cursorrules` file needs to be in your current working dire
 ```yaml
 project_title: "agentic-cursorrules"
 tree_focus:
-  - "src"    # Frontend logic
+  - "app"    # Frontend logic
   - "api"    # Backend services
   - "db"     # Database layer
   - "api/auth/middleware"    # Specific auth middleware subfolder
-  - "src/components/forms"   # Just the forms components
+  - "app/components/forms"   # Just the forms components
 ```
 
 For example, with this configuration:
-- The `src` agent will see all frontend files EXCEPT those in `components/forms`
+- The `app` agent will see all frontend files EXCEPT those in `components/forms`
 - The `api` agent will see all backend files EXCEPT those in `auth/middleware`
-- Dedicated agents for `api/auth/middleware` and `src/components/forms` will focus solely on their specific subsystems
+- Dedicated agents for `api/auth/middleware` and `app/components/forms` will focus solely on their specific subsystems
 - The `db` agent maintains access to all database-related files
 
 This separation allows you to have specialized agents working on form components or authentication middleware without interfering with the broader frontend or backend development efforts.
@@ -58,7 +58,7 @@ python main.py --recurring
 
 3. Reference the generated agent files in your development environment:
 ```
-@agentic-cursorrules_agent_src.md  # Frontend-focused agent
+@agentic-cursorrules_agent_app.md  # Frontend-focused agent
 @agentic-cursorrules_agent_api.md  # Backend-focused agent
 @agentic-cursorrules_agent_db.md   # Database-focused agent
 ```
