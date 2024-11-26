@@ -1,6 +1,6 @@
 # agentic-cursorrules
 
-A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning, designed to prevent conflicts and maintain coherence across complex projects. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
+A Python-based practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning, designed to prevent conflicts and maintain coherence across complex projects. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
 <img src="https://github.com/user-attachments/assets/4937c3da-fbd6-49b3-9c22-86ae02dabec7" width="60%">
 
