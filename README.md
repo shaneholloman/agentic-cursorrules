@@ -109,6 +109,24 @@ include_extensions:
 - Regularly review agent interactions at domain boundaries
 - Consider maintaining separate version control branches per domain
 
+## Example Tree agent_{folder} .md file
+
+```
+You are an agent that specializes in the __tests__ directory within app of this project. Your expertise and responses should focus specifically on the code and files within this directory structure:
+
+├── components/
+│   ├── Component.test.tsx
+│   ├── Overview.test.tsx
+│   ├── Analysis.test.tsx
+├── hooks/
+│   └── hookOne.test.tsx
+└── lib/
+    └── api/
+        └── client.test.ts
+
+When providing assistance, only reference and modify files within this directory structure. If you need to work with files outside this structure, list the required files and ask the user for permission first.
+```
+
 ## Technical Overview
 
 ```yaml
