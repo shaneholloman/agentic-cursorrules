@@ -35,7 +35,7 @@ class ProjectTreeGenerator:
             self.matches = parse_gitignore(temp_gitignore)
             temp_gitignore.unlink()
 
-    def generate_tree(self, directory: Path, file_types: List[str] = None, max_depth: int = 3, skip_dirs: Set[str] = None) -> List[str]:
+    def generate_tree(self, directory: Path, file_types: List[str] = None, max_depth: int = 3, skip_dirs: Set[str] = None, config_paths: Set[str] = None) -> List[str]:
         """
         Generates a visual tree representation of the directory structure.
         
@@ -44,9 +44,11 @@ class ProjectTreeGenerator:
             file_types: List of file extensions to include
             max_depth: Maximum depth to traverse
             skip_dirs: Set of directory paths to skip (already processed in parent trees)
+            config_paths: Set of all paths from config.yaml for exclusion checking
         """
         tree_lines = []
         skip_dirs = skip_dirs or set()
+        config_paths = config_paths or set()
 
         def _generate_tree(dir_path: Path, prefix: str = "", depth: int = 0):
             if depth > max_depth:
@@ -54,10 +56,13 @@ class ProjectTreeGenerator:
 
             items = sorted(list(dir_path.iterdir()), key=lambda x: (not x.is_file(), x.name))
             for i, item in enumerate(items):
-                # Skip if in exclude_dirs or matches gitignore
+                rel_path = str(item.relative_to(self.project_root))
+                
                 if (item.name in self.EXCLUDE_DIRS or 
                     self.matches(str(item)) or 
-                    str(item.relative_to(self.project_root)) in skip_dirs):
+                    rel_path in skip_dirs or
+                    (item.is_dir() and any(cp.startswith(rel_path) for cp in config_paths))):
+                    print(f"Skipping {rel_path}")  # Debug print
                     continue
 
                 is_last = i == len(items) - 1
@@ -237,6 +242,9 @@ if __name__ == "__main__":
             # Keep track of processed directories
             processed_dirs = set()
             
+            # Create a set of all configured paths for exclusion checking
+            config_paths = {str(Path(fd)) for fd in focus_dirs}
+            
             for focus_dir in found_dirs:
                 # Calculate relative path from project root
                 rel_path = focus_dir.relative_to(project_root)
@@ -255,7 +263,12 @@ if __name__ == "__main__":
                             and d != focus_dir 
                             and any(part.startswith('__') for part in d.relative_to(project_root).parts)}
                 
-                tree_content = generator.generate_tree(focus_dir, skip_dirs=skip_dirs)
+                # Pass the config_paths to generate_tree
+                tree_content = generator.generate_tree(
+                    focus_dir, 
+                    skip_dirs=skip_dirs,
+                    config_paths=config_paths
+                )
                 print('\n'.join(tree_content))
                 
                 # Save tree files in .agentic-cursorrules directory
