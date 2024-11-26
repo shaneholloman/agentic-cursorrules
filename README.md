@@ -216,4 +216,6 @@ Key Differentiator:
 Unlike simple multi-agent approaches, this tool enforces physical boundaries through file-tree partitioning, significantly reducing the risk of conflicting modifications while maintaining agent context awareness.
 ```
 
+## Stars
+
 [![Star History Chart](https://api.star-history.com/svg?repos=s-smits/agentic-cursorrules&type=Date)](https://star-history.com/#s-smits/agentic-cursorrules&Date)
