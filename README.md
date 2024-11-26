@@ -1,204 +1,125 @@
 # agentic-cursorrules
 
-A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
+A practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning, designed to prevent conflicts and maintain coherence across complex projects. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
 <img src="https://github.com/user-attachments/assets/4937c3da-fbd6-49b3-9c22-86ae02dabec7" width="60%">
 
 ## Core Concept
 
-This tool addresses a critical challenge in AI-assisted development: preventing merge conflicts and maintaining codebase coherence when using AI assistance across different parts of your codebase. It does this by:
+This tool addresses a critical challenge in AI-assisted development by preventing merge conflicts and maintaining codebase coherence when using AI assistance across different parts of your codebase, accomplishing this through:
 
 1. Partitioning the codebase into logical domains (e.g., frontend, API, database)
 2. Generating domain-specific markdown files with explicit file-tree boundaries
 3. Providing clear context and access rules for AI assistants through these markdown files
 
-## Why This Matters
-
-When working with AI assistance across different parts of a codebase:
-- AI responses might modify files outside their intended domain
-- Changes in one area can cascade into unintended modifications elsewhere
-- Maintaining proper context becomes increasingly difficult as the codebase grows
-
 ## Installation
 
-1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/agentic-cursorrules.git .agentic-cursorrules
 cd .agentic-cursorrules
-```
 
-2. Create and activate a virtual environment:
-```bash
 python -m venv venv
-
-# On Windows
-venv\Scripts\activate
-
-# On macOS/Linux
-source venv/bin/activate
-```
-
-3. Install dependencies:
-```bash
+source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
-```
 
-4. Set up your `.cursorrules` file ()):
-```bash
-# Add your favorite .cursorrules file
+# Set up .cursorrules file
 cp .cursorrules.example ../.cursorrules
 ```
-Important note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator.
-If there's already a `.cursorrules` file available in the root folder, it will be used instead of the current directory files.
 
-## Using Domain-Specific Markdown Files
-
-### Setup Requirements
-- A project with distinct architectural boundaries
-- Clear domain separation (e.g., frontend/backend/database)
-
-### Creating Multiple Agent Windows
-1. Use `CMD/CTRL + Shift + P` to open the command palette
-2. Search for "Duplicate as Workspace in New Window"
-3. Repeat this process for each desired agent window
-4. Arrange the windows according to your preferred layout
-
-### Using the Generated Markdown Files
-1. Generate domain-specific markdown files using the tool
-2. When working with an AI assistant:
-   - Reference the appropriate markdown file for the domain you're working in
-   - Use `@domain_name.md` to provide context to the AI
-   - Keep the AI focused on files within the specified domain
-
-### Best Practices
-- Empirically tested to work well with up to 4 concurrent agents
-- Consider system resources when running multiple instances
-- Organize windows logically based on domain responsibilities
+Important note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator, though if there's already a `.cursorrules` file available in the root folder, it will take precedence.
 
 ## Usage
 
-1. Configure your domains in `config.yaml`:
+1. Configure your domains in `config.yaml` with clear architectural boundaries:
 ```yaml
 project_title: "agentic-cursorrules"
 tree_focus:
   - "src"    # Frontend logic
   - "api"    # Backend services
   - "db"     # Database layer
+  - "api/auth/middleware"    # Specific auth middleware subfolder
+  - "src/components/forms"   # Just the forms components
 ```
 
-2. Run the generator:
+For example, with this configuration:
+- The `src` agent will see all frontend files EXCEPT those in `components/forms`
+- The `api` agent will see all backend files EXCEPT those in `auth/middleware`
+- Dedicated agents for `api/auth/middleware` and `src/components/forms` will focus solely on their specific subsystems
+- The `db` agent maintains access to all database-related files
+
+This separation allows you to have specialized agents working on form components or authentication middleware without interfering with the broader frontend or backend development efforts.
+
+2. Run the generator with optional recurring updates:
 ```bash
 python main.py
-```
-
-If you want to run it every minute, use `--recurring` flag:
-```bash
+# Or for recurring updates:
 python main.py --recurring
 ```
 
-3. Use the generated agent files in your prompts:
+3. Reference the generated agent files in your development environment:
 ```
-agentic-cursorrules_agent_src.md  # Frontend-focused agent
-agentic-cursorrules_agent_api.md  # Backend-focused agent
-agentic-cursorrules_agent_db.md   # Database-focused agent
+@agentic-cursorrules_agent_src.md  # Frontend-focused agent
+@agentic-cursorrules_agent_api.md  # Backend-focused agent
+@agentic-cursorrules_agent_db.md   # Database-focused agent
 ```
-
-4. Reference these files in your agent windows:
-   - Use `@agentic-cursorrules_agent_src.md` in the frontend agent window
-   - Use `@agentic-cursorrules_agent_api.md` in the backend agent window
-   - Use `@agentic-cursorrules_agent_db.md` in the database agent window
-
-This @ reference system ensures each agent stays within its designated boundaries, preventing conflicting file edits across domains!
-
-- Use one markdown file per domain
-- Reference the appropriate markdown file when switching domains
-- Keep domain boundaries clear and well-defined
 
 ## Default Configuration
 
-The tool comes with sensible defaults for web development projects, tailor it as you like:
+The tool comes with sensible defaults for web development projects that can be tailored to your specific needs:
 
 ```yaml
-# Important directories that should always be included
 important_dirs:
   - components
   - pages
   - app
-  # ... and more common directories
 
-# Directories that should always be excluded
 exclude_dirs:
   - node_modules
   - dist
   - build
-  # ... and more build/dependency directories
 
-# File extensions to include
 include_extensions:
   - .py
   - .ts
   - .tsx
-  # ... and a lot more file types
 ```
 
 ## How It Works
 
 1. **Codebase Partitioning**
-   - Defines clear boundaries through YAML configuration
+   - Defines clear boundaries through comprehensive YAML configuration
    - Generates separate file-trees for each domain
-   - Creates agent-specific markdown files containing:
-     - Base cursor rules
-     - Domain-specific file access rules
-     - Relevant file-tree context
+   - Creates agent-specific markdown files containing base rules and context
 
 2. **Access Control**
-   - Each agent receives only the file-tree information for its assigned domain
-   - Explicit instructions to operate only within defined boundaries
+   - Each agent receives only its domain-specific file-tree information
+   - Explicit instructions to operate within defined boundaries
    - Clear documentation of domain responsibilities
 
 3. **Conflict Prevention**
-   - Physical separation of concerns through file-tree partitioning
+   - Physical separation through intelligent file-tree partitioning
    - Clear ownership boundaries for each agent
-   - Reduced risk of overlapping modifications
+   - Significantly reduced risk of overlapping modifications
 
 ## Best Practices
 
-- Limit to 3-4 agents for optimal management
-- Define clear domain boundaries before starting
-- Use semantic naming for domains
-- Review agent interactions at domain boundaries
-- Maintain separate version control branches per domain when possible
-
-## Limitations
-
-- Not a complete solution for all merge conflicts
-- Requires careful domain boundary definition
-- Best suited for codebases with clear architectural separation
-- May need adjustment for highly interconnected modules
-
-## Contributing
-
-Contributions are welcome!
+- Maintain a limit of 3-4 concurrent agents for optimal performance and manageability
+- Define clear domain boundaries before initiating development
+- Implement semantic naming conventions for domains
+- Regularly review agent interactions at domain boundaries
+- Consider maintaining separate version control branches per domain
 
 ## Technical Overview
 
 ```yaml
-Agentic Cursor Rules: A practical implementation for managing multi-agent development through strict file-tree partitioning and access control.
-
-Technical Overview:
-- Generates domain-specific agent rulesets from base cursor rules
-- Enforces physical separation of concerns through file-tree partitioning
-- Prevents merge conflicts through explicit boundary definition
-- Scales effectively up to 4 concurrent agents
-- Supports custom domain definition via YAML configuration
-- Generates markdown-based agent instruction sets
-- Includes file-tree context for domain awareness
-
-Primary Use Case:
-Managing concurrent AI agent operations in large codebases where traditional merge resolution becomes impractical. Particularly effective for projects with clear architectural boundaries (e.g., frontend/backend separation, microservices).
-
-Key Differentiator:
-Unlike simple multi-agent approaches, this tool enforces physical boundaries through file-tree partitioning, significantly reducing the risk of conflicting modifications while maintaining agent context awareness.
+Key Features:
+- Sophisticated domain-specific agent rulesets
+- Physical separation through intelligent file-tree partitioning
+- Advanced conflict prevention via explicit boundary definition
+- Optimized support for up to 4 concurrent agents
+- Flexible domain configuration through YAML
+- Comprehensive markdown-based instruction sets
+- Contextual file-tree awareness
 ```
 
 ## Stars
