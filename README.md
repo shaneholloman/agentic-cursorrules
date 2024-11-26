@@ -24,7 +24,7 @@ When working with AI assistance across different parts of a codebase:
 1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/agentic-cursorrules.git .agentic-cursorrules
-cd agentic-cursorrules
+cd .agentic-cursorrules
 ```
 
 2. Create and activate a virtual environment:
