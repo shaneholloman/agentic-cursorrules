@@ -52,7 +52,7 @@ This separation allows you to have specialized agents working on form components
 2. Run the generator with optional recurring updates:
 ```bash
 python main.py
-# Or for recurring updates:
+# Or for recurring updates every 60 seconds:
 python main.py --recurring
 ```
 
