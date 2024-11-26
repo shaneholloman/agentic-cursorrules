@@ -1,11 +1,11 @@
 project_title: "cursorrules-agentic"
 
 tree_focus:
-  - "public"
   - "src"
-  # - "docs"
-  # - "tests"
-  # etc...
+  - "app"
+  # - "db"
+  # - "api/auth/middleware"
+  # - "src/components/forms"
 
 # Important directories that should always be included
 important_dirs:
