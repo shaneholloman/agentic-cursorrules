@@ -176,24 +176,9 @@ include_extensions:
 - Best suited for codebases with clear architectural separation
 - May need adjustment for highly interconnected modules
 
-## Development Setup
-
-1. Install development dependencies:
-```bash
-pip install -r requirements-dev.txt
-```
-
-2. Set up pre-commit hooks:
-```bash
-pre-commit install
-```
-
 ## Contributing
 
-Contributions are welcome, particularly in these areas:
-- Enhanced domain boundary detection
-- Improved conflict prevention strategies
-- Additional tooling for agent coordination
+Contributions are welcome!
 
 ## Technical Overview
 
