@@ -21,9 +21,10 @@ When working with AI assistance across different parts of a codebase:
 
 ## Installation
 
-1. Clone the repository:```bash
+1. Clone the repository:
+```bash
 git clone https://github.com/yourusername/agentic-cursorrules.git .agentic-cursorrules
-cd agentic-cursorrules
+cd .agentic-cursorrules
 ```
 
 2. Create and activate a virtual environment:
@@ -45,8 +46,7 @@ pip install -r requirements.txt
 4. Set up your `.cursorrules` file ()):
 ```bash
 # Add your favorite .cursorrules file
-cp .cursorrules .cursorrules.example
-
+cp .cursorrules.example ../.cursorrules
 ```
 Important note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator.
 If there's already a `.cursorrules` file available in the root folder, it will be used instead of the current directory files.
