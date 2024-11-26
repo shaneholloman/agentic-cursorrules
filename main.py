@@ -116,7 +116,11 @@ def generate_agent_files(focus_dirs: List[str], agentic_dir: Path):
                 tree_content = f.read()
         
         # Only include the tree content
-        agent_content = f"Project structure for {dir_name}:\n\n{tree_content}"
+        agent_content = f"""You are an agent that specializes in the {dir_name} portion of this project. Your expertise and responses should focus specifically on the code and files within this directory structure:
+
+{tree_content}
+
+When providing assistance, only reference and modify files within this directory structure. If you need to work with files outside this structure, list the required files and ask the user for permission first."""
         
         output_path = root_dir / f'agent_{dir_name}.md'
         with open(output_path, 'w', encoding='utf-8') as f:
