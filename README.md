@@ -33,6 +33,7 @@ Important note: The `.cursorrules` file needs to be in your current working dire
 1. Configure your domains in `config.yaml` with clear architectural boundaries:
 ```yaml
 project_title: "agentic-cursorrules"
+
 tree_focus:
   - "app"    # Frontend logic
   - "api"    # Backend services
