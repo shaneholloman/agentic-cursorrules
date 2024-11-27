@@ -15,7 +15,7 @@ This tool addresses a critical challenge in AI-assisted development by preventin
 ## Installation
 
 ```bash
-git clone https://github.com/yourusername/agentic-cursorrules.git .agentic-cursorrules
+git clone https://github.com/s-smits/agentic-cursorrules.git .agentic-cursorrules
 cd .agentic-cursorrules
 
 python -m venv venv
