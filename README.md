@@ -128,6 +128,13 @@ You are an agent that specializes in the __tests__ directory within app of this 
 When providing assistance, only reference and modify files within this directory structure. If you need to work with files outside this structure, list the required files and ask the user for permission first.
 ```
 
+## IDE Compatibility
+
+Primarily designed for and tested with Cursor IDE, while maintaining compatibility with other AI-enhanced development environments:
+- [Cursor](https://cursor.sh/) (primary focus)
+- [Windsurf IDE](https://codeium.com/windsurf/) (experimental support)
+- Future support planned for any text editor implementing agent-based context awareness
+
 ## Technical Overview
 
 ```yaml
