@@ -73,16 +73,19 @@ important_dirs:
   - components
   - pages
   - app
+  - ...
 
 exclude_dirs:
   - node_modules
   - dist
   - build
+  - ...
 
 include_extensions:
   - .py
   - .ts
   - .tsx
+  - ...
 ```
 
 ## How It Works
