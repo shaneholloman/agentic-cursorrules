@@ -138,6 +138,10 @@ Primarily designed for and tested with Cursor IDE, while maintaining compatibili
 - [Windsurf IDE](https://codeium.com/windsurf/) (experimental support)
 - Future support planned for any text editor implementing agent-based context awareness
 
+### Using CMD/CTRL+Shift+P in Cursor/Windsurf/etc
+
+To create dedicated workspace windows in Cursor/Windsurf/etc, use the shortcut CMD/CTRL+Shift+P to open the command palette, then type ">Duplicate Workspace" to create a new workspace window. This allows you to manage different agents in separate windows, maintaining focus and organization.
+
 ## Technical Overview
 
 ```yaml
