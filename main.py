@@ -5,16 +5,18 @@ from gitignore_parser import parse_gitignore
 import time
 import argparse
 import sys
+import shutil
 
 class ProjectTreeGenerator:
-    def __init__(self, project_root: Path):
+    def __init__(self, project_root: Path, config_dir: Path):
         """
         Initializes the generator with gitignore-based exclusions and the project root.
         """
         self.project_root = project_root
+        self.config_dir = config_dir
         
-        # Load config from YAML
-        config_path = project_root / '.agentic-cursorrules' / 'config.yaml'
+        # Load config from YAML in the config directory
+        config_path = config_dir / 'config.yaml'
         with open(config_path, 'r') as f:
             config = yaml.safe_load(f)
         
@@ -133,11 +135,10 @@ class ProjectTreeGenerator:
         print("\nDebug - Final found_dirs:", found_dirs)
         return found_dirs
 
-def generate_agent_files(focus_dirs: List[str], agentic_dir: Path):
+def generate_agent_files(focus_dirs: List[str], config_dir: Path, project_dir: Path):
     """
     Generates agent-specific markdown files for each focus directory.
     """
-    root_dir = agentic_dir.parent
     created_files = set()
 
     for dir_path in focus_dirs:
@@ -149,7 +150,7 @@ def generate_agent_files(focus_dirs: List[str], agentic_dir: Path):
             # Handle both Path objects and strings safely
             dir_name = dir_path.name if isinstance(dir_path, Path) else dir_path
             parent_path = dir_path.parent if isinstance(dir_path, Path) else Path(dir_path).parent
-            parent_name = parent_path.name if parent_path != root_dir else None
+            parent_name = parent_path.name if parent_path != project_dir else None
             
             # Generate the agent file name based on the path structure
             if str(dir_path).count('/') > 0:
@@ -164,7 +165,7 @@ def generate_agent_files(focus_dirs: List[str], agentic_dir: Path):
                 continue
                 
             # Use the last part of the path for the tree file name
-            tree_file = agentic_dir / f'tree_{dir_path.name}.txt'
+            tree_file = config_dir / f'tree_{dir_path.name}.txt'
             tree_content = ""
             if tree_file.exists():
                 with open(tree_file, 'r', encoding='utf-8') as f:
@@ -184,7 +185,8 @@ def generate_agent_files(focus_dirs: List[str], agentic_dir: Path):
 
 When providing assistance, only reference and modify files within this directory structure. If you need to work with files outside this structure, list the required files and ask the user for permission first."""
             
-            output_path = root_dir / agent_name
+            # Save to project directory
+            output_path = project_dir / agent_name
             with open(output_path, 'w', encoding='utf-8') as f:
                 f.write(agent_content)
             print(f"Created {output_path}")
@@ -203,14 +205,30 @@ if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser()
         parser.add_argument('--recurring', action='store_true', help='Run the script every minute')
+        parser.add_argument('--project-path', type=str, help='Path to the target project directory')
         args = parser.parse_args()
+
+        # Get the config directory (where the script is located)
+        config_dir = Path(__file__).parent
+
+        # Set project directory from argument or use parent of config dir
+        project_dir = Path(args.project_path) if args.project_path else config_dir.parent
+        
+        # Ensure project directory exists
+        if not project_dir.exists():
+            print(f"Error: Project directory {project_dir} does not exist")
+            sys.exit(1)
+
+        # Copy .cursorrules to project directory if it doesn't exist
+        cursorrules_example = config_dir / '.cursorrules.example'
+        project_cursorrules = project_dir / '.cursorrules'
+        if not project_cursorrules.exists() and cursorrules_example.exists():
+            shutil.copy2(cursorrules_example, project_cursorrules)
+            print(f"Copied .cursorrules to {project_cursorrules}")
         
         while True:  # Add while loop for recurring execution
-            # Get the .agentic-cursorrules directory path
-            agentic_dir = Path(__file__).parent
-            
-            # Create default config.yaml in the .agentic-cursorrules directory
-            config_path = agentic_dir / 'config.yaml'
+            # Create default config.yaml in the config directory if it doesn't exist
+            config_path = config_dir / 'config.yaml'
             if not config_path.exists():
                 default_config = {
                     'tree_focus': ['api', 'app']
@@ -232,12 +250,10 @@ if __name__ == "__main__":
                 print("Using default configuration...")
                 focus_dirs = ['api', 'app']
             
-            # Use parent directory of .agentic-cursorrules as the project root
-            project_root = agentic_dir.parent
-            generator = ProjectTreeGenerator(project_root)
+            generator = ProjectTreeGenerator(project_dir, config_dir)
             
             # Generate tree for each focus directory
-            found_dirs = generator.find_focus_dirs(project_root, focus_dirs)
+            found_dirs = generator.find_focus_dirs(project_dir, focus_dirs)
             
             # Keep track of processed directories
             processed_dirs = set()
@@ -247,7 +263,7 @@ if __name__ == "__main__":
             
             for focus_dir in found_dirs:
                 # Calculate relative path from project root
-                rel_path = focus_dir.relative_to(project_root)
+                rel_path = focus_dir.relative_to(project_dir)
                 
                 # Skip if this directory is already included in a parent tree
                 if any(str(rel_path).startswith(str(pd)) for pd in processed_dirs 
@@ -258,10 +274,10 @@ if __name__ == "__main__":
                 print("=" * (len(focus_dir.name) + 9))
                 
                 # Generate skip_dirs for subdirectories that will be processed separately
-                skip_dirs = {str(d.relative_to(project_root)) for d in found_dirs 
-                            if str(d.relative_to(project_root)).startswith(str(rel_path)) 
+                skip_dirs = {str(d.relative_to(project_dir)) for d in found_dirs 
+                            if str(d.relative_to(project_dir)).startswith(str(rel_path)) 
                             and d != focus_dir 
-                            and any(part.startswith('__') for part in d.relative_to(project_root).parts)}
+                            and any(part.startswith('__') for part in d.relative_to(project_dir).parts)}
                 
                 # Pass the config_paths to generate_tree
                 tree_content = generator.generate_tree(
@@ -271,14 +287,14 @@ if __name__ == "__main__":
                 )
                 print('\n'.join(tree_content))
                 
-                # Save tree files in .agentic-cursorrules directory
-                with open(agentic_dir / f'tree_{focus_dir.name}.txt', 'w', encoding='utf-8') as f:
+                # Save tree files in config directory
+                with open(config_dir / f'tree_{focus_dir.name}.txt', 'w', encoding='utf-8') as f:
                     f.write('\n'.join(tree_content))
                 
                 processed_dirs.add(rel_path)
             
-            # Generate agent files in .agentic-cursorrules directory
-            generate_agent_files([str(d.relative_to(project_root)) for d in found_dirs], agentic_dir)
+            # Generate agent files in project directory
+            generate_agent_files([str(d.relative_to(project_dir)) for d in found_dirs], config_dir, project_dir)
 
             if not args.recurring:
                 break
