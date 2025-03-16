@@ -29,21 +29,54 @@ class ConfigGenerator:
                 '.html', '.md', '.vue', '.svelte'
             ]
         }
+        
+        print(f"ConfigGenerator initialized with:")
+        print(f"  - Project directory: {self.project_dir}")
+        print(f"  - Config path: {self.config_path}")
     
     def load_existing_config(self):
         """Load existing config.yaml if it exists."""
         try:
             with open(self.config_path, 'r') as f:
-                return yaml.safe_load(f) or {}
+                config = yaml.safe_load(f) or {}
+                print(f"Loaded existing config with {len(config.get('tree_focus', []))} focus directories")
+                return config
         except FileNotFoundError:
+            print(f"No existing config found at {self.config_path}, creating new one")
             return {}
     
     def save_config(self, config):
         """Save config to config.yaml."""
-        with open(self.config_path, 'w') as f:
-            yaml.dump(config, f, default_flow_style=False)
-        print(f"Updated {self.config_path} with {len(config.get('tree_focus', []))} focus directories")
-        return config
+        try:
+            print(f"Saving config to {self.config_path}")
+            print(f"Config contains:")
+            print(f"  - {len(config.get('tree_focus', []))} focus directories")
+            print(f"  - {len(config.get('exclude_dirs', []))} excluded directories")
+            
+            # Ensure proper YAML formatting
+            with open(self.config_path, 'w') as f:
+                yaml.dump(config, f, default_flow_style=False, sort_keys=False)
+            
+            # Verify file was written
+            if os.path.exists(self.config_path):
+                file_size = os.path.getsize(self.config_path)
+                print(f"✅ Config successfully written ({file_size} bytes)")
+                with open(self.config_path, 'r') as f:
+                    # Print the first few lines to verify structure
+                    print("\nConfig preview:")
+                    for i, line in enumerate(f):
+                        if i < 10:  # Print first 10 lines
+                            print(f"  {line.rstrip()}")
+                        else:
+                            print("  ...")
+                            break
+            else:
+                print(f"❌ Failed to write config file - file doesn't exist after save")
+                
+            return config
+        except Exception as e:
+            print(f"❌ Error saving config: {str(e)}")
+            raise
     
     def merge_with_defaults(self, config):
         """Merge config with default values for missing sections."""
@@ -52,24 +85,31 @@ class ConfigGenerator:
         # Set project title if not present
         if 'project_title' not in result:
             result['project_title'] = self.project_dir.name
+            print(f"Added project_title: {result['project_title']}")
             
         # Add default sections if missing
         for section, default_values in self.defaults.items():
             if section not in result:
                 result[section] = default_values
+                print(f"Added default {section} ({len(default_values)} items)")
                 
         return result
     
     def generate_from_tree_text(self, tree_text):
         """Generate config from a tree text representation."""
+        print("\nGenerating config from tree text...")
+        
         # Parse the tree structure
         directories = self._parse_directories_from_tree(tree_text)
+        print(f"Parsed {len(directories)} directories from tree text")
         
         # Generate focus dirs from the tree
         focus_dirs = self._identify_focus_dirs(directories)
+        print(f"Identified {len(focus_dirs)} focus directories: {', '.join(focus_dirs)}")
         
         # Extract excluded dirs
         exclude_dirs = self._identify_exclude_dirs(directories)
+        print(f"Identified {len(exclude_dirs)} exclude directories: {', '.join(exclude_dirs)}")
         
         # Load existing config
         config = self.load_existing_config()
@@ -85,10 +125,19 @@ class ConfigGenerator:
             config['exclude_dirs'] = exclude_dirs
         
         # Merge with defaults and save
-        return self.save_config(self.merge_with_defaults(config))
+        config = self.merge_with_defaults(config)
+        
+        # Ensure tree_focus is at the top after project_title
+        ordered_config = {}
+        ordered_config['project_title'] = config.pop('project_title')
+        ordered_config['tree_focus'] = config.pop('tree_focus')
+        ordered_config.update(config)  # Add remaining sections
+        
+        return self.save_config(ordered_config)
     
     def generate_from_filesystem(self):
         """Generate config by directly scanning the filesystem."""
+        print("\nGenerating config from filesystem...")
         focus_dirs = []
         exclude_dirs = set(self.defaults['exclude_dirs'])
         
@@ -104,6 +153,9 @@ class ConfigGenerator:
             # Check if this is a significant directory (contains code files)
             if self._is_significant_directory(item):
                 focus_dirs.append(item.name)
+                print(f"Found significant directory: {item.name}")
+        
+        print(f"Identified {len(focus_dirs)} focus directories: {', '.join(focus_dirs)}")
         
         # Load existing config
         config = self.load_existing_config()
@@ -113,7 +165,15 @@ class ConfigGenerator:
         config['exclude_dirs'] = sorted(exclude_dirs)
         
         # Merge with defaults and save
-        return self.save_config(self.merge_with_defaults(config))
+        config = self.merge_with_defaults(config)
+        
+        # Ensure tree_focus is at the top after project_title
+        ordered_config = {}
+        ordered_config['project_title'] = config.pop('project_title')
+        ordered_config['tree_focus'] = config.pop('tree_focus')
+        ordered_config.update(config)  # Add remaining sections
+        
+        return self.save_config(ordered_config)
     
     def _is_significant_directory(self, directory):
         """Check if directory contains code files or important subdirectories."""
@@ -177,51 +237,3 @@ class ConfigGenerator:
                 exclude_dirs.add(dir_name)
         
         return sorted(list(exclude_dirs))
-
-
-def main():
-    """Command-line interface."""
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="Generate config.yaml from tree text or filesystem")
-    parser.add_argument("--from-filesystem", action="store_true", 
-                       help="Generate config by scanning the filesystem directly")
-    parser.add_argument("--tree-file", type=str, help="Path to tree text file")
-    parser.add_argument("--project-dir", type=str, help="Path to project directory")
-    parser.add_argument("--config-dir", type=str, help="Path to config directory")
-    args = parser.parse_args()
-    
-    # Initialize generator
-    generator = ConfigGenerator(
-        project_dir=Path(args.project_dir) if args.project_dir else None,
-        config_dir=Path(args.config_dir) if args.config_dir else None
-    )
-    
-    if args.from_filesystem:
-        # Generate from filesystem
-        generator.generate_from_filesystem()
-    elif args.tree_file:
-        # Generate from tree file
-        with open(args.tree_file, 'r', encoding='utf-8') as f:
-            tree_text = f.read()
-        generator.generate_from_tree_text(tree_text)
-    else:
-        # Interactive mode - read tree text from stdin
-        print("Please paste your file tree below (Ctrl+D or Ctrl+Z+Enter when done):")
-        tree_text = ""
-        try:
-            while True:
-                line = input()
-                tree_text += line + "\n"
-        except (EOFError, KeyboardInterrupt):
-            pass
-        
-        if tree_text.strip():
-            generator.generate_from_tree_text(tree_text)
-        else:
-            print("No tree text provided. Use --from-filesystem to scan directly.")
-            sys.exit(1)
-
-
-if __name__ == "__main__":
-    main()
