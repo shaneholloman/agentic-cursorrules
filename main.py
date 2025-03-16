@@ -201,11 +201,23 @@ When providing assistance, only reference and modify files within this directory
             print("  - Special directory: '__tests__'")
             continue
 
+def add_arguments(parser):
+    """Add command-line arguments to the parser."""
+    parser.add_argument('--recurring', action='store_true', 
+                        help='Run the script every minute')
+    parser.add_argument('--project-path', type=str, 
+                        help='Path to the target project directory')
+    parser.add_argument('--tree-input', action='store_true',
+                        help='Provide a tree structure to generate config')
+    parser.add_argument('--include_under', type=int, default=50,
+                        help='Include files under specified size in KB (default: 50KB)')
+    parser.add_argument('--similarity', type=float, default=0.8,
+                        help='Similarity threshold for grouping files (0.0-1.0, default: 0.8)')
+
 if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser()
-        parser.add_argument('--recurring', action='store_true', help='Run the script every minute')
-        parser.add_argument('--project-path', type=str, help='Path to the target project directory')
+        add_arguments(parser)
         args = parser.parse_args()
 
         # Get the config directory (where the script is located)
@@ -214,6 +226,31 @@ if __name__ == "__main__":
         # Set project directory from argument or use parent of config dir
         project_dir = Path(args.project_path) if args.project_path else config_dir.parent
         
+        # If tree input mode is enabled, handle that first
+        if args.tree_input:
+            from tree_to_config import process_tree_input
+            
+            print("Please paste your file tree below (Ctrl+D or Ctrl+Z+Enter when done):")
+            tree_text = ""
+            try:
+                while True:
+                    line = input()
+                    tree_text += line + "\n"
+            except (EOFError, KeyboardInterrupt):
+                pass
+            
+            config_path = config_dir / 'config.yaml'
+            process_tree_input(
+                tree_text, 
+                config_path,
+                max_size_kb=min(max(args.include_under, 0), 1000), # max size is 1000kb (for now)
+                similarity_threshold=min(max(args.similarity, 0.0), 1.0)
+            )
+            
+            # If we're just updating config, exit
+            if input("Continue with generation? (y/n): ").lower() != 'y':
+                sys.exit(0)
+
         # Ensure project directory exists
         if not project_dir.exists():
             print(f"Error: Project directory {project_dir} does not exist")

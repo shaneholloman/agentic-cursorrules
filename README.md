@@ -59,9 +59,9 @@ python main.py --recurring
 
 3. Reference the generated agent files in your development environment:
 ```
-@agentic-cursorrules_agent_app.md  # Frontend-focused agent
-@agentic-cursorrules_agent_api.md  # Backend-focused agent
-@agentic-cursorrules_agent_db.md   # Database-focused agent
+@agent_app.md  # Frontend-focused agent
+@agent_api.md  # Backend-focused agent
+@agent_db.md   # Database-focused agent
 ```
 
 ## Default Configuration
@@ -116,7 +116,7 @@ include_extensions:
 ## Example Tree agent_{folder} .md file
 
 ```
-You are an agent that specializes in the __tests__ directory within app of this project. Your expertise and responses should focus specifically on the code and files within this directory structure:
+ the __tests__ directory within app of this project. Your expertise and responses should focus specifically on the code and files within this directory structure:
 
 ├── components/
 │   ├── Component.test.tsx
@@ -133,7 +133,7 @@ When providing assistance, only reference and modify files within this directory
 
 ## IDE Compatibility
 
-Primarily designed for and tested with Cursor IDE, while maintaining compatibility with other AI-enhanced development environments:
+Primarily designed for and tested with Cursor IDE, whiYou are an agent that specializes inle maintaining compatibility with other AI-enhanced development environments:
 - [Cursor](https://cursor.sh/) (primary focus)
 - [Windsurf IDE](https://codeium.com/windsurf/) (experimental support)
 - Future support planned for any text editor implementing agent-based context awareness
