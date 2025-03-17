@@ -1,16 +1,12 @@
 # agentic-cursorrules
 
-A Python-based practical approach to managing multiple AI agents in large codebases by enforcing strict file-tree partitioning, designed to prevent conflicts and maintain coherence across complex projects. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
+A Python-based tool for managing multiple AI agents in large codebases by enforcing strict file-tree partitioning, preventing conflicts, and maintaining coherence. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
 <img src="https://github.com/user-attachments/assets/4937c3da-fbd6-49b3-9c22-86ae02dabec7" width="60%">
 
 ## Core Concept
 
-This tool addresses a critical challenge in AI-assisted development by preventing merge conflicts and maintaining codebase coherence when using AI assistance across different parts of your codebase, accomplishing this through:
-
-1. Partitioning the codebase into logical domains (e.g., frontend, API, database)
-2. Generating domain-specific markdown files with explicit file-tree boundaries
-3. Providing clear context and access rules for AI assistants through these markdown files
+Agentic-cursorrules partitions your codebase into logical domains (frontend, backend, database, etc.) and generates domain-specific markdown files with explicit file-tree boundaries, ensuring AI agents operate within clearly defined contexts.
 
 ## Installation
 
@@ -22,136 +18,129 @@ python -m venv venv
 source venv/bin/activate  # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 
-# Set up .cursorrules file
 cp .cursorrules.example ../.cursorrules
 ```
 
-Important note: The `.cursorrules` file needs to be in your current working directory where you'll run the agent generator, though if there's already a `.cursorrules` file available in the root folder, it will take precedence.
+Ensure `.cursorrules` is in your working directory or project root.
 
 ## Usage
 
-1. Configure your domains in `config.yaml` with clear architectural boundaries:
+### 1. Manual Configuration
+
+Define domains explicitly in `config.yaml`:
+
 ```yaml
 project_title: "agentic-cursorrules"
 
 tree_focus:
-  - "app"    # Frontend logic
-  - "api"    # Backend services
-  - "db"     # Database layer
-  - "api/auth/middleware"    # Specific auth middleware subfolder
-  - "app/components/forms"   # Just the forms components
+  - "app"                    # Frontend logic
+  - "api"                    # Backend services
+  - "db"                     # Database layer
+  - "api/auth/middleware"    # Specific auth middleware
+  - "app/components/forms"   # Forms components
 ```
 
-For example, with this configuration:
-- The `app` agent will see all frontend files EXCEPT those in `components/forms`
-- The `api` agent will see all backend files EXCEPT those in `auth/middleware`
-- Dedicated agents for `api/auth/middleware` and `app/components/forms` will focus solely on their specific subsystems
-- The `db` agent maintains access to all database-related files
+### 2. Automatic Configuration
 
-This separation allows you to have specialized agents working on form components or authentication middleware without interfering with the broader frontend or backend development efforts.
+Generate domains automatically:
 
-2. Run the generator with optional recurring updates:
+- **Filesystem scan** to auto-generate domains:
 ```bash
-python main.py
-# Or for recurring updates every 60 seconds:
-python main.py --recurring
+python main.py --auto-config
 ```
 
-3. Reference the generated agent files in your development environment:
-```
-@agent_app.md  # Frontend-focused agent
-@agent_api.md  # Backend-focused agent
-@agent_db.md   # Database-focused agent
+- **Interactive tree structure input**:
+```bash
+python main.py --tree-input
 ```
 
-## Default Configuration
-
-The tool comes with sensible defaults for web development projects that can be tailored to your specific needs:
-
-```yaml
-important_dirs:
-  - components
-  - pages
-  - app
-  - ...
-
-exclude_dirs:
-  - node_modules
-  - dist
-  - build
-  - ...
-
-include_extensions:
-  - .py
-  - .ts
-  - .tsx
-  - ...
+- **Reuse previously detected configuration** (`detected_config.yaml`):
+```bash
+python main.py --use-detected
 ```
 
-## How It Works
+### 3. Run the Generator
 
-1. **Codebase Partitioning**
-   - Defines clear boundaries through comprehensive YAML configuration
-   - Generates separate file-trees for each domain
-   - Creates agent-specific markdown files containing base rules and context
+```bash
+python main.py [OPTIONS]
+```
 
-2. **Access Control**
-   - Each agent receives only its domain-specific file-tree information
-   - Explicit instructions to operate within defined boundaries
-   - Clear documentation of domain responsibilities
+### 4. Reference Generated Agent Files
 
-3. **Conflict Prevention**
-   - Physical separation through intelligent file-tree partitioning
-   - Clear ownership boundaries for each agent
-   - Significantly reduced risk of overlapping modifications
+```markdown
+@agent_app.md  # Frontend agent
+@agent_api.md  # Backend agent
+@agent_db.md   # Database agent
+```
+
+## Arguments
+
+| Option                 | Description                                           |
+|------------------------|-------------------------------------------------------|
+| `--auto-config`        | Auto-generate config domains from filesystem scan     |
+| `--tree-input`         | Interactively provide tree structure for config       |
+| `--use-detected`       | Use existing `detected_config.yaml` if available      |
+| `--verify-config`      | Print current `config.yaml` content                   |
+| `--local-agents`       | Store agent files in script directory                 |
+| `--project-path PATH`  | Specify target repository location                    |
+| `--project-title NAME` | Set project title for generated config                |
+| `--recurring`          | Run generator every 60 seconds                        |
+
+## File Organization
+
+- Generated tree structures stored in `tree_files/`
+- Default: agent files placed directly in target repo
+- With `--local-agents`: agent files remain in agentic-cursorrules directory
+
+## Advanced Features
+
+### 🔍 Smart Directory Analysis
+
+- Multi-phase directory detection (standard → detailed scan → fallback)
+- Intelligent identification of significant code directories
+- Gitignore-aware file filtering
+
+### 📂 Enhanced File Extension Detection
+
+- Comprehensive extension detection via GitHub repository data
+- Robust fallback extension list
+- Cached results for improved performance
+
+### 📝 Agent File Generation
+
+- Context-aware markdown files for each domain
+- Intelligent naming conventions for nested directories
+- Clear directory descriptions and explicit boundaries
+
+### ✅ Enhanced Path Handling
+
+- Absolute path resolution with `.resolve()`
+- Improved relative path calculations and graceful fallbacks
+- Detailed debug messages for easier troubleshooting
 
 ## Best Practices
 
-- Maintain a limit of 3-4 concurrent agents for optimal performance and manageability
-- Define clear domain boundaries before initiating development
-- Implement semantic naming conventions for domains
+- Limit to 3-4 concurrent agents for optimal performance
+- Clearly define domain boundaries before development
 - Regularly review agent interactions at domain boundaries
-- Consider maintaining separate version control branches per domain
-
-## Example Tree agent_{folder} .md file
-
-```
- the __tests__ directory within app of this project. Your expertise and responses should focus specifically on the code and files within this directory structure:
-
-├── components/
-│   ├── Component.test.tsx
-│   ├── Overview.test.tsx
-│   ├── Analysis.test.tsx
-├── hooks/
-│   └── hookOne.test.tsx
-└── lib/
-    └── api/
-        └── client.test.ts
-
-When providing assistance, only reference and modify files within this directory structure. If you need to work with files outside this structure, list the required files and ask the user for permission first.
-```
+- Consider separate version control branches per domain
 
 ## IDE Compatibility
 
-Primarily designed for and tested with Cursor IDE, whiYou are an agent that specializes inle maintaining compatibility with other AI-enhanced development environments:
-- [Cursor](https://cursor.sh/) (primary focus)
-- [Windsurf IDE](https://codeium.com/windsurf/) (experimental support)
-- Future support planned for any text editor implementing agent-based context awareness
+Primarily designed for Cursor IDE, with experimental support for Windsurf IDE and planned support for other AI-enhanced editors.
 
-### Using CMD/CTRL+Shift+P in Cursor/Windsurf/etc
-
-To create dedicated workspace windows in Cursor/Windsurf/etc, use the shortcut CMD/CTRL+Shift+P to open the command palette, then type ">Duplicate Workspace" to create a new workspace window. This allows you to manage different agents in separate windows, maintaining focus and organization.
+Use CMD/CTRL+Shift+P → ">Duplicate Workspace" to manage agents in separate workspace windows.
 
 ## Technical Overview
 
 ```yaml
 Key Features:
-- Sophisticated domain-specific agent rulesets
-- Physical separation through intelligent file-tree partitioning
-- Advanced conflict prevention via explicit boundary definition
-- Optimized support for up to 4 concurrent agents
-- Flexible domain configuration through YAML
-- Comprehensive markdown-based instruction sets
+- Domain-specific agent rulesets
+- Intelligent file-tree partitioning
+- Explicit boundary definitions
+- Optimized for multiple concurrent agents
+- YAML-based flexible configuration
+- Markdown-based instruction sets
 - Contextual file-tree awareness
 ```
 

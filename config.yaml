@@ -1,52 +1,45 @@
-project_title: "cursorrules-agentic"
-
+project_title: fastapi-next-starter
 tree_focus:
-  - "app"
-  - "api"
-  # - "db"
-  # - "api/auth/middleware"
-  # - "app/components/forms"
-
-# Important directories that should always be included
-important_dirs:
-  - components
-  - pages
-  - app
-  - src
-  - lib
-  - utils
-  - hooks
-  - styles
-  - public
-  - assets
-  - layouts
-  - services
-  - context
-  - types
-
-# Directories that should always be excluded
+- backend
+- frontend
 exclude_dirs:
-  - node_modules
-  - dist
-  - build
-  - .next
-  - out
-  - __pycache__
-  - venv
-  - env
-  - .git
-
-# File extensions to include
+- .git
+- .next
+- __pycache__
+- build
+- dist
+- env
+- node_modules
+- out
+- venv
+- coverage
+- .pytest_cache
+important_dirs:
+- api
+- components
+- pages
+- app
+- src
+- models
+- schemas
+- routers
+- hooks
+- features
+- public
+- shared
+- config
+- tests
+- interfaces
 include_extensions:
-  - .py
-  - .ts
-  - .tsx
-  - .js
-  - .jsx
-  - .json
-  - .css
-  - .scss
-  - .html
-  - .md
-  - .vue
-  - .svelte
+- .py
+- .ts
+- .tsx
+- .js
+- .jsx
+- .json
+- .css
+- .scss
+- .html
+- .md
+- .prisma
+- .env

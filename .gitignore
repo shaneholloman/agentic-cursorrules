@@ -283,3 +283,9 @@ next-env.d.ts
 
 # own scripts
 tree_*.txt
+docs.md
+tree_files
+config_auto.yaml
+config_manual.yaml
+detected_config.yaml
+config.yaml
