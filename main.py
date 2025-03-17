@@ -418,6 +418,9 @@ def generate_agent_files(focus_dirs: List[str], config_dir: Path, project_dir: P
     created_files = set()
     print(f"\n📝 Generating agent files in project directory: {project_dir}")
 
+    # Create a reference to the tree_files directory
+    tree_files_dir = config_dir / 'tree_files'
+
     for dir_path in focus_dirs:
         try:
             # Ensure dir_path is a Path object
@@ -461,7 +464,8 @@ def generate_agent_files(focus_dirs: List[str], config_dir: Path, project_dir: P
                 continue
                 
             # Use the last part of the path for the tree file name
-            tree_file = config_dir / f'tree_{dir_name}.txt'
+            # Look in tree_files directory instead of config_dir directly
+            tree_file = tree_files_dir / f'tree_{dir_name}.txt'
             tree_content = ""
             if tree_file.exists():
                 with open(tree_file, 'r', encoding='utf-8') as f:
