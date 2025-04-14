@@ -1,8 +1,8 @@
+<img src="https://github.com/user-attachments/assets/76dd45bd-3822-42cf-a2a7-40b83a360611" style="width:50%;" />
+
 # agentic-cursorrules
 
 A Python-based tool for managing multiple AI agents in large codebases by enforcing strict file-tree partitioning, preventing conflicts, and maintaining coherence. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
-
-![ChatGPT Image Apr 14 2025 from Cursorrules](https://github.com/user-attachments/assets/76dd45bd-3822-42cf-a2a7-40b83a360611)
 
 ## Core Concept
 
