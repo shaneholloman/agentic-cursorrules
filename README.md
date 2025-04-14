@@ -2,7 +2,7 @@
 
 A Python-based tool for managing multiple AI agents in large codebases by enforcing strict file-tree partitioning, preventing conflicts, and maintaining coherence. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
 
-<img src="https://github.com/user-attachments/assets/4937c3da-fbd6-49b3-9c22-86ae02dabec7" width="60%">
+![ChatGPT Image Apr 14 2025 from Cursorrules](https://github.com/user-attachments/assets/76dd45bd-3822-42cf-a2a7-40b83a360611)
 
 ## Core Concept
 
