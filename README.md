@@ -1,5 +1,3 @@
-<img width="785" height="707" alt="image" src="https://github.com/user-attachments/assets/3b80f21f-e081-4928-82d1-6acb516ec598" />
-
 # agentic-cursorrules
 
 Partition large codebases into domain-specific contexts for multi-agent workflows. Generates isolated markdown rule files that prevent agent conflicts through explicit file-tree boundaries.
