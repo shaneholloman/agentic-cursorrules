@@ -2,147 +2,140 @@
 
 # agentic-cursorrules
 
-A Python-based tool for managing multiple AI agents in large codebases by enforcing strict file-tree partitioning, preventing conflicts, and maintaining coherence. Inspired by [cursor-boost](https://github.com/grp06/cursor-boost).
+Partition large codebases into domain-specific contexts for multi-agent workflows. Generates isolated markdown rule files that prevent agent conflicts through explicit file-tree boundaries.
 
-## Core Concept
+## Why agentic-cursorrules
 
-Agentic-cursorrules partitions your codebase into logical domains (frontend, backend, database, etc.) and generates domain-specific markdown files with explicit file-tree boundaries, ensuring AI agents operate within clearly defined contexts.
+- Enforces strict domain boundaries by mapping directory structures to agent-specific contexts.
+- Prevents cross-domain contamination when multiple AI agents work concurrently on the same codebase.
+- Auto-generates agent files from filesystem scans or YAML configuration with intelligent directory detection.
+- Optimizes context windows by limiting each agent's view to relevant subtrees only.
 
-## Installation
+## Quick start
+
+Prerequisites: Python 3.10+
 
 ```bash
 git clone https://github.com/s-smits/agentic-cursorrules.git .agentic-cursorrules
 cd .agentic-cursorrules
 
 python -m venv venv
-source venv/bin/activate  # or venv\Scripts\activate on Windows
+source venv/bin/activate
 pip install -r requirements.txt
 
 cp .cursorrules.example ../.cursorrules
 ```
 
-Ensure `.cursorrules` is in your working directory or project root.
+Generate agent files from automatic detection:
 
-## Usage
-
-### 1. Manual Configuration
-
-Define domains explicitly in `config.yaml`:
-
-```yaml
-project_title: "agentic-cursorrules"
-
-tree_focus:
-  - "app"                    # Frontend logic
-  - "api"                    # Backend services
-  - "db"                     # Database layer
-  - "api/auth/middleware"    # Specific auth middleware
-  - "app/components/forms"   # Forms components
-```
-
-### 2. Automatic Configuration
-
-Generate domains automatically:
-
-- **Filesystem scan** to auto-generate domains:
 ```bash
 python main.py --auto-config
 ```
 
-- **Interactive tree structure input**:
+Or define domains manually in `config.yaml`:
+
+```yaml
+project_title: "your-project"
+tree_focus:
+  - "backend/api"
+  - "frontend/components"
+  - "ml/training"
+```
+
+Then run:
+
+```bash
+python main.py
+```
+
+Reference generated agents in your IDE:
+
+```markdown
+@agent_backend_api.md
+@agent_frontend_components.md
+@agent_ml_training.md
+```
+
+## Configuration strategies
+
+**Filesystem scan** (recommended for initial setup):
+```bash
+python main.py --auto-config
+```
+
+**Interactive tree input**:
 ```bash
 python main.py --tree-input
 ```
 
-- **Reuse previously detected configuration** (`detected_config.yaml`):
+**Reuse detected configuration**:
 ```bash
 python main.py --use-detected
 ```
 
-### 3. Run the Generator
+**Manual YAML definition** for precise control over domain boundaries.
 
-```bash
-python main.py [OPTIONS]
+## Architecture at a glance
+
+```
+.agentic-cursorrules/
+├── main.py                    # orchestration and generation
+├── config.yaml                # manual domain definitions
+├── detected_config.yaml       # auto-generated from filesystem
+└── tree_files/                # intermediate tree structures
+
+target-repo/
+├── agent_backend_api.md       # backend agent context
+├── agent_frontend_components.md
+└── agent_ml_training.md
 ```
 
-### 4. Reference Generated Agent Files
+## CLI arguments
 
-```markdown
-@agent_app.md  # Frontend agent
-@agent_api.md  # Backend agent
-@agent_db.md   # Database agent
-```
-
-## Arguments
-
-| Option                 | Description                                           |
+| Flag                   | Effect                                                |
 |------------------------|-------------------------------------------------------|
-| `--auto-config`        | Auto-generate config domains from filesystem scan     |
-| `--tree-input`         | Interactively provide tree structure for config       |
-| `--use-detected`       | Use existing `detected_config.yaml` if available      |
-| `--verify-config`      | Print current `config.yaml` content                   |
+| `--auto-config`        | Scan filesystem and generate domain configuration     |
+| `--tree-input`         | Interactively provide tree structure                  |
+| `--use-detected`       | Load `detected_config.yaml` instead of `config.yaml`  |
+| `--verify-config`      | Print active configuration to stdout                  |
 | `--local-agents`       | Store agent files in script directory                 |
-| `--project-path PATH`  | Specify target repository location                    |
-| `--project-title NAME` | Set project title for generated config                |
-| `--recurring`          | Run generator every 60 seconds                        |
+| `--project-path PATH`  | Target repository location                            |
+| `--project-title NAME` | Project identifier for generated configs              |
+| `--recurring`          | Regenerate every 60 seconds                           |
 
-## File Organization
+## Advanced features
 
-- Generated tree structures stored in `tree_files/`
-- Default: agent files placed directly in target repo
-- With `--local-agents`: agent files remain in agentic-cursorrules directory
+**Multi-phase directory detection**: Standard scan → detailed analysis → fallback heuristics ensure domains are identified even in non-standard project layouts.
 
-## Advanced Features
+**Gitignore-aware filtering**: Respects `.gitignore` patterns during tree generation to exclude build artifacts and dependencies.
 
-### 🔍 Smart Directory Analysis
+**Extension detection via GitHub API**: Fetches comprehensive language-specific file extensions with local caching for offline operation.
 
-- Multi-phase directory detection (standard → detailed scan → fallback)
-- Intelligent identification of significant code directories
-- Gitignore-aware file filtering
+**Nested domain naming**: Converts `api/auth/middleware` to `agent_api_auth_middleware.md` with clear parent-child relationships in the generated documentation.
 
-### 📂 Enhanced File Extension Detection
+## Best practices
 
-- Comprehensive extension detection via GitHub repository data
-- Robust fallback extension list
-- Cached results for improved performance
+- Limit concurrent agents to 3-4 domains to prevent context dilution.
+- Define boundaries at architectural layer interfaces (API/DB, frontend/backend, training/inference).
+- Use separate workspace windows (CMD+Shift+P → ">Duplicate Workspace") when operating multiple agents simultaneously.
+- Regenerate agent files after significant refactoring that changes directory structure.
 
-### 📝 Agent File Generation
+## IDE support
 
-- Context-aware markdown files for each domain
-- Intelligent naming conventions for nested directories
-- Clear directory descriptions and explicit boundaries
+Primary target: Cursor IDE. Experimental compatibility with Windsurf IDE. The generated markdown files follow standard referencing patterns (`@filename.md`) compatible with most AI-enhanced editors.
 
-### ✅ Enhanced Path Handling
-
-- Absolute path resolution with `.resolve()`
-- Improved relative path calculations and graceful fallbacks
-- Detailed debug messages for easier troubleshooting
-
-## Best Practices
-
-- Limit to 3-4 concurrent agents for optimal performance
-- Clearly define domain boundaries before development
-- Regularly review agent interactions at domain boundaries
-- Consider separate version control branches per domain
-
-## IDE Compatibility
-
-Primarily designed for Cursor IDE, with experimental support for Windsurf IDE and planned support for other AI-enhanced editors.
-
-Use CMD/CTRL+Shift+P → ">Duplicate Workspace" to manage agents in separate workspace windows.
-
-## Technical Overview
+## Technical details
 
 ```yaml
-Key Features:
-- Domain-specific agent rulesets
-- Intelligent file-tree partitioning
-- Explicit boundary definitions
-- Optimized for multiple concurrent agents
-- YAML-based flexible configuration
-- Markdown-based instruction sets
-- Contextual file-tree awareness
+Core components:
+- YAML-based configuration with override hierarchy
+- Recursive file-tree traversal with pruning
+- Markdown template generation with embedded context
+- Path resolution with absolute→relative fallback
+- Multi-strategy directory significance scoring
 ```
+
+Inspired by [cursor-boost](https://github.com/grp06/cursor-boost) but focuses on agent isolation rather than context augmentation.
 
 ## Stars
 
