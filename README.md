@@ -1,4 +1,4 @@
-<img src="https://github.com/user-attachments/assets/76dd45bd-3822-42cf-a2a7-40b83a360611" style="width:50%;" />
+<img width="785" height="707" alt="image" src="https://github.com/user-attachments/assets/3b80f21f-e081-4928-82d1-6acb516ec598" />
 
 # agentic-cursorrules
 
