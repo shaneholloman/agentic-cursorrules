@@ -17,12 +17,19 @@ Prerequisites: Python 3.10+
 git clone https://github.com/s-smits/agentic-cursorrules.git .agentic-cursorrules
 cd .agentic-cursorrules
 
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+uv venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+uv sync
 
 cp .cursorrules.example ../.cursorrules
 ```
+
+### Dependency management
+
+- Install updates: `uv sync`
+- Add packages: `uv add <package>`
+- Remove packages: `uv remove <package>`
+- Run commands without activating the venv: `uv run python main.py --auto-config`
 
 Generate agent files from automatic detection:
 

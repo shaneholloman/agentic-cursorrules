@@ -281,7 +281,8 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# own scripts
+# local
 tree_*.txt
 docs.md
 tree_files
+.venv/
