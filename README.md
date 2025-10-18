@@ -4,10 +4,11 @@ Partition large codebases into domain-specific contexts for multi-agent workflow
 
 ## Why agentic-cursorrules
 
-- Enforces strict domain boundaries by mapping directory structures to agent-specific contexts.
-- Prevents cross-domain contamination when multiple AI agents work concurrently on the same codebase.
-- Auto-generates agent files from filesystem scans or YAML configuration with intelligent directory detection.
-- Optimizes context windows by limiting each agent's view to relevant subtrees only.
+Traditional AI agent workflows give every helper the whole repository, which leads to conflicting edits and confusing cross-domain suggestions. Agentic-cursorrules keeps each agent inside a clearly defined slice of the tree, so conversations stay focused, diffs stay local, and coordination overhead drops without forcing the agents to understand the entire project at once.
+
+## How it works
+
+Agentic-cursorrules reads a configuration that maps directory patterns to named domains. It can build that configuration automatically by scanning the filesystem or you can define the mapping yourself in `config.yaml`. When you run `main.py`, the tool resolves each domain, filters files using `.gitignore` rules, and writes per-domain markdown files that describe the boundaries and relevant paths. These markdown files are referenced inside your IDE so every AI agent receives only the context that matches its domain.
 
 ## Quick start
 
@@ -31,13 +32,19 @@ cp .cursorrules.example ../.cursorrules
 - Remove packages: `uv remove <package>`
 - Run commands without activating the venv: `uv run python main.py --auto-config`
 
-Generate agent files from automatic detection:
+## Usage
+
+### Automatic domain detection
 
 ```bash
-python main.py --auto-config
+uv run python main.py --auto-config
 ```
 
-Or define domains manually in `config.yaml`:
+This scans the repository, builds a suggested domain mapping, and stores it in `detected_config.yaml`. Rerun the command to refresh the mapping after large refactors.
+
+### Manual domain definition
+
+Edit `config.yaml` when you want to control boundaries precisely:
 
 ```yaml
 project_title: "your-project"
@@ -47,101 +54,29 @@ tree_focus:
   - "ml/training"
 ```
 
-Then run:
+Generate the agent files with:
 
 ```bash
-python main.py
+uv run python main.py
 ```
 
-Reference generated agents in your IDE:
+### Other entry points
 
-```markdown
-@agent_backend_api.md
-@agent_frontend_components.md
-@agent_ml_training.md
-```
+- Inspect the current config without writing files: `uv run python main.py --verify-config`
+- Provide your own tree interactively: `uv run python main.py --tree-input`
+- Use the last detected config: `uv run python main.py --use-detected`
 
-## Configuration strategies
+## Agent files
 
-**Filesystem scan** (recommended for initial setup):
-```bash
-python main.py --auto-config
-```
+Each domain produces a markdown file such as `@agent_backend_api.md` or `@agent_frontend_components.md`. Reference these from your IDE (for example, Cursor or Windsurf) when prompting an agent. The file lists the directories, key files, and guardrails that apply to that domain so the agent stays within its lane.
 
-**Interactive tree input**:
-```bash
-python main.py --tree-input
-```
-
-**Reuse detected configuration**:
-```bash
-python main.py --use-detected
-```
-
-**Manual YAML definition** for precise control over domain boundaries.
-
-## Architecture at a glance
+## Repository layout (for orientation)
 
 ```
 .agentic-cursorrules/
-├── main.py                    # orchestration and generation
-├── config.yaml                # manual domain definitions
-├── detected_config.yaml       # auto-generated from filesystem
-└── tree_files/                # intermediate tree structures
-
-target-repo/
-├── agent_backend_api.md       # backend agent context
-├── agent_frontend_components.md
-└── agent_ml_training.md
+├── main.py             # orchestration and file generation
+├── config.yaml         # primary configuration
+├── config_manual.yaml  # sample manual setup
+├── smart_analyzer.py   # directory and extension detection logic
+└── tests/              # pytest-based checks
 ```
-
-## CLI arguments
-
-| Flag                   | Effect                                                |
-|------------------------|-------------------------------------------------------|
-| `--auto-config`        | Scan filesystem and generate domain configuration     |
-| `--tree-input`         | Interactively provide tree structure                  |
-| `--use-detected`       | Load `detected_config.yaml` instead of `config.yaml`  |
-| `--verify-config`      | Print active configuration to stdout                  |
-| `--local-agents`       | Store agent files in script directory                 |
-| `--project-path PATH`  | Target repository location                            |
-| `--project-title NAME` | Project identifier for generated configs              |
-| `--recurring`          | Regenerate every 60 seconds                           |
-
-## Advanced features
-
-**Multi-phase directory detection**: Standard scan → detailed analysis → fallback heuristics ensure domains are identified even in non-standard project layouts.
-
-**Gitignore-aware filtering**: Respects `.gitignore` patterns during tree generation to exclude build artifacts and dependencies.
-
-**Extension detection via GitHub API**: Fetches comprehensive language-specific file extensions with local caching for offline operation.
-
-**Nested domain naming**: Converts `api/auth/middleware` to `agent_api_auth_middleware.md` with clear parent-child relationships in the generated documentation.
-
-## Best practices
-
-- Limit concurrent agents to 3-4 domains to prevent context dilution.
-- Define boundaries at architectural layer interfaces (API/DB, frontend/backend, training/inference).
-- Use separate workspace windows (CMD+Shift+P → ">Duplicate Workspace") when operating multiple agents simultaneously.
-- Regenerate agent files after significant refactoring that changes directory structure.
-
-## IDE support
-
-Primary target: Cursor IDE. Experimental compatibility with Windsurf IDE. The generated markdown files follow standard referencing patterns (`@filename.md`) compatible with most AI-enhanced editors.
-
-## Technical details
-
-```yaml
-Core components:
-- YAML-based configuration with override hierarchy
-- Recursive file-tree traversal with pruning
-- Markdown template generation with embedded context
-- Path resolution with absolute→relative fallback
-- Multi-strategy directory significance scoring
-```
-
-Inspired by [cursor-boost](https://github.com/grp06/cursor-boost) but focuses on agent isolation rather than context augmentation.
-
-## Stars
-
-[![Star History Chart](https://api.star-history.com/svg?repos=s-smits/agentic-cursorrules&type=Date)](https://star-history.com/#s-smits/agentic-cursorrules&Date)
